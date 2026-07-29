@@ -474,6 +474,21 @@
             }
         });
 
+        // Listen for messages from Lua engine
+        window.addEventListener('message', (event) => {
+            const data = event.data;
+            if (!data) return;
+            const msgType = data.type || data.action;
+            const wrapper = document.getElementById('veh-menu-wrapper');
+            if (msgType === 'menuUpdate' || msgType === 'spawnMenuUpdate') {
+                if (data.open === false) {
+                    if (wrapper) wrapper.style.display = 'none';
+                } else {
+                    if (wrapper) wrapper.style.display = 'flex';
+                }
+            }
+        });
+
         // Initialize
         renderVehCards();
     </script>
