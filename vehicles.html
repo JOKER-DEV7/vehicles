@@ -16,8 +16,10 @@
             user-select: none;
         }
 
+        html,
         body {
             background: transparent !important;
+            background-color: rgba(0, 0, 0, 0) !important;
             font-family: 'Cairo', 'Inter', sans-serif;
             color: #ffffff;
             width: 100vw;
@@ -26,6 +28,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0;
+            padding: 0;
         }
 
         /* ===== CONTAINER ===== */
@@ -413,6 +417,22 @@
 
         let currentCategory = 'all';
 
+        function handleImgError(imgEl, code) {
+            const backup1 = `https://raw.githubusercontent.com/Micky69/gtav-vehicle-images/master/images/${code.toLowerCase()}.png`;
+            const backup2 = `https://raw.githubusercontent.com/joker-dev7/gtav-vehicle-images/main/images/${code.toLowerCase()}.png`;
+            const backup3 = `https://j.top4top.io/p_3857fwuju1.png`;
+            if (!imgEl.dataset.tried1) {
+                imgEl.dataset.tried1 = "true";
+                imgEl.src = backup1;
+            } else if (!imgEl.dataset.tried2) {
+                imgEl.dataset.tried2 = "true";
+                imgEl.src = backup2;
+            } else if (!imgEl.dataset.tried3) {
+                imgEl.dataset.tried3 = "true";
+                imgEl.src = backup3;
+            }
+        }
+
         function renderVehCards() {
             const grid = document.getElementById('vehCardsGrid');
             grid.innerHTML = '';
@@ -422,16 +442,16 @@
                 : vehiclesList.filter(v => v.cat === currentCategory);
 
             filtered.forEach(v => {
-                const imgUrl = `https://raw.githubusercontent.com/BaziFoX/gtav-vehicle-images/master/images/${v.code}.png`;
+                const imgUrl = `https://raw.githubusercontent.com/BaziFoX/gtav-vehicle-images/master/images/${v.code.toLowerCase()}.png`;
                 const card = document.createElement('div');
                 card.className = 'veh-card';
                 card.onclick = () => spawnVehicle(v.code);
 
                 card.innerHTML = `
-                    <img src="${imgUrl}" class="veh-card-img" onerror="this.src='https://raw.githubusercontent.com/Micky69/gtav-vehicle-images/master/images/${v.code}.png'">
+                    <img src="${imgUrl}" class="veh-card-img" onerror="handleImgError(this, '${v.code}');">
                     <div class="veh-card-name">${v.name}</div>
                     <div class="veh-card-code">${v.code}</div>
-                    <button class="veh-spawn-btn" onclick="event.stopPropagation(); spawnVehicle('${v.code}');">استدعاء وتملك</button>
+                    <button class="veh-spawn-btn" onclick="event.stopPropagation(); spawnVehicle('${v.code}');">🚗 استدعاء وتملك</button>
                 `;
                 grid.appendChild(card);
             });
