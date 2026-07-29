@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JK Vehicle Spawner Menu</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: transparent;
+            font-family: 'Cairo', 'Inter', sans-serif;
+            color: #ffffff;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== CONTAINER ===== */
+        #veh-menu-wrapper {
+            width: 1000px;
+            height: 680px;
+            background: linear-gradient(135deg, rgba(12, 10, 16, 0.96) 0%, rgba(20, 14, 26, 0.98) 100%);
+            border: 1px solid rgba(255, 50, 50, 0.6);
+            border-radius: 18px;
+            box-shadow: 0 0 40px rgba(255, 30, 30, 0.25), 0 15px 50px rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            backdrop-filter: blur(15px);
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #veh-menu-wrapper.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            height: 80px;
+            background: rgba(20, 5, 5, 0.9);
+            border-bottom: 2px solid rgba(255, 50, 50, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            flex-shrink: 0;
+        }
+
+        .header-title-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #ff2222 0%, #990000 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 15px rgba(255, 30, 30, 0.4);
+        }
+
+        .header-text h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .header-text h1 span {
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 50, 50, 0.5);
+        }
+
+        .header-text p {
+            font-size: 12px;
+            color: #aaaaaa;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: rgba(255, 50, 50, 0.15);
+            border: 1px solid rgba(255, 50, 50, 0.5);
+            color: #ff4444;
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 50, 50, 0.35);
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(255, 30, 30, 0.4);
+        }
+
+        /* ===== MAIN BODY ===== */
+        .menu-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ===== LEFT COLUMN: CARDS & CATEGORIES ===== */
+        .cards-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+        }
+
+        .cat-pills {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .cat-pill {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #cccccc;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .cat-pill:hover,
+        .cat-pill.active {
+            background: linear-gradient(90deg, rgba(220, 20, 20, 0.8) 0%, rgba(140, 10, 10, 0.8) 100%);
+            border-color: rgba(255, 50, 50, 0.8);
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(255, 30, 30, 0.3);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+            flex: 1;
+            overflow-y: auto;
+            padding-left: 6px;
+        }
+
+        .cards-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .cards-grid::-webkit-scrollbar-thumb {
+            background: rgba(255, 50, 50, 0.5);
+            border-radius: 4px;
+        }
+
+        .veh-card {
+            background: rgba(20, 20, 25, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.25 ease;
+            position: relative;
+        }
+
+        .veh-card:hover {
+            border-color: rgba(255, 50, 50, 0.7);
+            background: rgba(35, 15, 20, 0.9);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(255, 30, 30, 0.25);
+        }
+
+        .veh-card-img {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+        }
+
+        .veh-card-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .veh-card-code {
+            font-size: 11px;
+            font-weight: 700;
+            color: #ff4444;
+            background: rgba(255, 50, 50, 0.12);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .veh-spawn-btn {
+            width: 100%;
+            padding: 6px 0;
+            background: linear-gradient(90deg, #ff2222 0%, #b30000 100%);
+            border: none;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .veh-spawn-btn:hover {
+            box-shadow: 0 0 10px rgba(255, 30, 30, 0.5);
+        }
+
+        /* ===== RIGHT COLUMN: CUSTOM CODE SPAWNER ===== */
+        .code-section {
+            width: 320px;
+            padding: 24px;
+            background: rgba(10, 5, 8, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .code-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 50, 50, 0.4);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: inset 0 0 15px rgba(255, 30, 30, 0.05);
+        }
+
+        .code-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .code-desc {
+            font-size: 12px;
+            color: #aaaaaa;
+            line-height: 1.5;
+        }
+
+        .code-input-field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 50, 50, 0.5);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+            direction: ltr;
+        }
+
+        .code-input-field:focus {
+            border-color: #ff3333;
+            box-shadow: 0 0 12px rgba(255, 50, 50, 0.4);
+        }
+
+        .code-submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #ff2222 0%, #aa0000 100%);
+            border: 1px solid rgba(255, 50, 50, 0.8);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .code-submit-btn:hover {
+            background: linear-gradient(90deg, #ff3333 0%, #cc0000 100%);
+            box-shadow: 0 0 15px rgba(255, 30, 30, 0.5);
+        }
+
+        .hints-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 11px;
+            color: #999999;
+        }
+
+        .hints-box span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="veh-menu-wrapper" class="visible">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-title-box">
+                <div class="header-icon">🚗</div>
+                <div class="header-text">
+                    <h1>JK <span>VEHICLE SPAWNER</span></h1>
+                    <p>منيو استدعاء جميع السيارات بالصور والكود المخصص • VRP / QB / ESX</p>
+                </div>
+            </div>
+            <button class="close-btn" onclick="closeVehMenu()">إغلاق [ESC]</button>
+        </div>
+
+        <!-- MAIN BODY -->
+        <div class="menu-body">
+            <!-- LEFT COLUMN: CARDS & CATEGORIES -->
+            <div class="cards-section">
+                <div class="cat-pills" id="catPills">
+                    <div class="cat-pill active" onclick="filterCategory('all', this)">الكل</div>
+                    <div class="cat-pill" onclick="filterCategory('sports', this)">سيارات رياضية</div>
+                    <div class="cat-pill" onclick="filterCategory('suv', this)">دفع رباعي</div>
+                    <div class="cat-pill" onclick="filterCategory('bikes', this)">دراجات نارية</div>
+                    <div class="cat-pill" onclick="filterCategory('aircraft', this)">طائرات ومروحيات</div>
+                </div>
+
+                <div class="cards-grid" id="vehCardsGrid"></div>
+            </div>
+
+            <!-- RIGHT COLUMN: CUSTOM CODE SPAWNER -->
+            <div class="code-section">
+                <div class="code-box">
+                    <div class="code-title">🔑 كود السيارة (Custom Code)</div>
+                    <div class="code-desc">أدخل كود أو اسم أي سيارة متواجدة داخل السيرفر لاستدعائها وتملكها فوراً.</div>
+                    <input type="text" id="customVehInput" class="code-input-field"
+                        placeholder="مثال: adder, t20, kuruma, police..."
+                        onkeydown="if(event.key==='Enter') triggerSpawnInput();" />
+                    <button class="code-submit-btn" onclick="triggerSpawnInput()">🚗 استدعاء وتملك السيارة</button>
+                </div>
+
+                <div class="hints-box">
+                    <span>💡 يتم وضعك في مقعد السائق تلقائياً فور الريسبون</span>
+                    <span>💡 تعمل العمولات وإعطاء المفاتيح تلقائياً لجميع السيرفرات</span>
+                    <span>💡 يمكنك الضغط على ESC لإغلاق القائمة في أي وقت</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const vehiclesList = [
+            { name: "ADDER (بوغاتي)", code: "adder", cat: "sports" },
+            { name: "ZENTORNO (لامبورغيني)", code: "zentorno", cat: "sports" },
+            { name: "T20 (مكلارين)", code: "t20", cat: "sports" },
+            { name: "BANSHEE 2", code: "banshee2", cat: "sports" },
+            { name: "INFERNUS", code: "infernus", cat: "sports" },
+            { name: "TURISMO R", code: "turismor", cat: "sports" },
+            { name: "VACCA", code: "vacca", cat: "sports" },
+            { name: "BULLET", code: "bullet", cat: "sports" },
+            { name: "CHEETAH", code: "cheetah", cat: "sports" },
+            { name: "ENTITY XF", code: "entityxf", cat: "sports" },
+            { name: "OSIRIS", code: "osiris", cat: "sports" },
+            { name: "BALLER (رنج روفر)", code: "baller", cat: "suv" },
+            { name: "DUBSTA (جي كلاس)", code: "dubsta", cat: "suv" },
+            { name: "HUNTLEY", code: "huntley", cat: "suv" },
+            { name: "GRESLEY", code: "gresley", cat: "suv" },
+            { name: "KURUMA", code: "kuruma", cat: "suv" },
+            { name: "SULTAN", code: "sultan", cat: "suv" },
+            { name: "BUFFALO", code: "buffalo", cat: "suv" },
+            { name: "DOMINATOR", code: "dominator", cat: "suv" },
+            { name: "BATI 801", code: "bati", cat: "bikes" },
+            { name: "HAKUCHOU", code: "hakuchou", cat: "bikes" },
+            { name: "AKUMA", code: "akuma", cat: "bikes" },
+            { name: "SHOTARO", code: "shotaro", cat: "bikes" },
+            { name: "SANCHEZ", code: "sanchez", cat: "bikes" },
+            { name: "BUZZARD (مروحية حربية)", code: "buzzard", cat: "aircraft" },
+            { name: "FROGGER", code: "frogger", cat: "aircraft" },
+            { name: "MAVERICK", code: "maverick", cat: "aircraft" },
+            { name: "HYDRA (طائرة نفاثة)", code: "hydra", cat: "aircraft" },
+            { name: "LAZER", code: "lazer", cat: "aircraft" },
+            { name: "LUXOR (طائرة خاصة)", code: "luxor", cat: "aircraft" }
+        ];
+
+        let currentCategory = 'all';
+
+        function renderVehCards() {
+            const grid = document.getElementById('vehCardsGrid');
+            grid.innerHTML = '';
+
+            const filtered = currentCategory === 'all'
+                ? vehiclesList
+                : vehiclesList.filter(v => v.cat === currentCategory);
+
+            filtered.forEach(v => {
+                const imgUrl = `https://raw.githubusercontent.com/BaziFoX/gtav-vehicle-images/master/images/${v.code}.png`;
+                const card = document.createElement('div');
+                card.className = 'veh-card';
+                card.onclick = () => spawnVehicle(v.code);
+
+                card.innerHTML = `
+                    <img src="${imgUrl}" class="veh-card-img" onerror="this.src='https://raw.githubusercontent.com/Micky69/gtav-vehicle-images/master/images/${v.code}.png'">
+                    <div class="veh-card-name">${v.name}</div>
+                    <div class="veh-card-code">${v.code}</div>
+                    <button class="veh-spawn-btn" onclick="event.stopPropagation(); spawnVehicle('${v.code}');">استدعاء وتملك</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat, el) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+            if (el) el.classList.add('active');
+            renderVehCards();
+        }
+
+        function spawnVehicle(modelCode) {
+            const resName = (window.GetParentResourceName ? window.GetParentResourceName() : 'loader');
+            fetch(`https://${resName}/vehCodeSubmit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: modelCode })
+            }).catch(() => { });
+        }
+
+        function triggerSpawnInput() {
+            const input = document.getElementById('customVehInput');
+            const val = (input && input.value && input.value.trim() !== '') ? input.value.trim() : 'adder';
+            spawnVehicle(val);
+        }
+
+        function closeVehMenu() {
+            const resName = (window.GetParentResourceName ? window.GetParentResourceName() : 'loader');
+            fetch(`https://${resName}/closeVehMenu`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            }).catch(() => { });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeVehMenu();
+            }
+        });
+
+        // Initialize
+        renderVehCards();
+    </script>
+</body>
+
+</html>
