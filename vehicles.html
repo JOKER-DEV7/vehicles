@@ -539,7 +539,6 @@
                     <img src="${imgUrl}" class="veh-card-img" onerror="handleImgError(this, '${v.code}');">
                     <div class="veh-card-name">${v.name}</div>
                     <div class="veh-card-code">${v.code}</div>
-                    <button class="veh-spawn-btn" onclick="event.stopPropagation(); spawnVehicle('${v.code}');">🚗 استدعاء وتملك</button>
                 `;
                 grid.appendChild(card);
             });
