@@ -666,6 +666,11 @@
                 }
             } else if (key === 'Escape') {
                 closeVehMenu();
+            } else if (key === 'Backspace') {
+                const input = document.getElementById('customVehInput');
+                if (input) {
+                    input.value = input.value.slice(0, -1);
+                }
             }
         }
 
@@ -720,6 +725,11 @@
                 }
             } else if (msgType === 'keyNavigation' && data.key) {
                 handleKeyNav(data.key);
+            } else if (msgType === 'typeChar' && data.char) {
+                const input = document.getElementById('customVehInput');
+                if (input) {
+                    input.value += data.char;
+                }
             }
         });
 
