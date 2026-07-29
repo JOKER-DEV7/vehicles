@@ -39,12 +39,11 @@
             background: linear-gradient(135deg, rgba(12, 10, 16, 0.96) 0%, rgba(20, 14, 26, 0.98) 100%);
             border: 1px solid rgba(255, 50, 50, 0.6);
             border-radius: 18px;
-            box-shadow: 0 0 40px rgba(255, 30, 30, 0.25), 0 15px 50px rgba(0, 0, 0, 0.85);
+            box-shadow: 0 0 35px rgba(255, 30, 30, 0.35);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
-            backdrop-filter: blur(15px);
             opacity: 1;
             transform: scale(1);
         }
@@ -329,6 +328,33 @@
             align-items: center;
             gap: 6px;
         }
+
+        /* ===== KEYBOARD FOCUS HIGHLIGHTS ===== */
+        .veh-card.kb-focus {
+            border: 2px solid #ff2222 !important;
+            background: linear-gradient(145deg, rgba(60, 15, 25, 0.95), rgba(30, 10, 15, 0.95)) !important;
+            transform: translateY(-5px) scale(1.04);
+            box-shadow: 0 0 25px rgba(255, 34, 34, 0.65), 0 10px 25px rgba(0, 0, 0, 0.8) !important;
+            z-index: 5;
+        }
+
+        .cat-pill.kb-focus {
+            outline: 2px solid #ff3333;
+            outline-offset: 2px;
+            box-shadow: 0 0 15px rgba(255, 50, 50, 0.8);
+        }
+
+        .code-input-field.kb-focus {
+            border-color: #ff2222 !important;
+            box-shadow: 0 0 18px rgba(255, 34, 34, 0.6) !important;
+            background: rgba(20, 5, 10, 0.8) !important;
+        }
+
+        .code-submit-btn.kb-focus {
+            background: linear-gradient(90deg, #ff3333 0%, #cc0000 100%) !important;
+            box-shadow: 0 0 22px rgba(255, 34, 34, 0.8) !important;
+            transform: scale(1.03);
+        }
     </style>
 </head>
 
@@ -433,6 +459,63 @@
             }
         }
 
+        let navZone = 'cards'; // 'categories' | 'cards' | 'customInput' | 'customBtn'
+        let cardIndex = 0;
+        let catIndex = 0;
+        const catKeys = ['all', 'sports', 'suv', 'bikes', 'aircraft'];
+        let lastKeyNavTime = 0;
+
+        function getGridCols() {
+            const grid = document.getElementById('vehCardsGrid');
+            if (!grid || grid.children.length === 0) return 3;
+            const gridWidth = grid.clientWidth - 12;
+            const cardWidth = 194; // 180px min + gap
+            return Math.max(1, Math.floor(gridWidth / cardWidth));
+        }
+
+        function updateKbFocus() {
+            document.querySelectorAll('.kb-focus').forEach(el => el.classList.remove('kb-focus'));
+            const customInput = document.getElementById('customVehInput');
+            const customBtn = document.querySelector('.code-submit-btn');
+
+            if (navZone === 'categories') {
+                if (customInput && document.activeElement === customInput) customInput.blur();
+                const pills = document.querySelectorAll('.cat-pill');
+                if (pills[catIndex]) {
+                    pills[catIndex].classList.add('kb-focus');
+                    pills[catIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                }
+            } else if (navZone === 'cards') {
+                if (customInput && document.activeElement === customInput) customInput.blur();
+                const cards = document.querySelectorAll('.veh-card');
+                if (cards[cardIndex]) {
+                    cards[cardIndex].classList.add('kb-focus');
+                    cards[cardIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            } else if (navZone === 'customInput') {
+                if (customInput) {
+                    customInput.classList.add('kb-focus');
+                    customInput.focus();
+                }
+            } else if (navZone === 'customBtn') {
+                if (customInput && document.activeElement === customInput) customInput.blur();
+                if (customBtn) {
+                    customBtn.classList.add('kb-focus');
+                }
+            }
+        }
+
+        function filterCategory(cat, el, fromKb) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+            if (el) el.classList.add('active');
+            renderVehCards();
+            if (fromKb) {
+                navZone = 'categories';
+                updateKbFocus();
+            }
+        }
+
         function renderVehCards() {
             const grid = document.getElementById('vehCardsGrid');
             grid.innerHTML = '';
@@ -441,11 +524,16 @@
                 ? vehiclesList
                 : vehiclesList.filter(v => v.cat === currentCategory);
 
-            filtered.forEach(v => {
+            filtered.forEach((v, idx) => {
                 const imgUrl = `https://raw.githubusercontent.com/BaziFoX/gtav-vehicle-images/master/images/${v.code.toLowerCase()}.png`;
                 const card = document.createElement('div');
                 card.className = 'veh-card';
                 card.onclick = () => spawnVehicle(v.code);
+                card.onmouseenter = () => {
+                    navZone = 'cards';
+                    cardIndex = idx;
+                    updateKbFocus();
+                };
 
                 card.innerHTML = `
                     <img src="${imgUrl}" class="veh-card-img" onerror="handleImgError(this, '${v.code}');">
@@ -455,13 +543,131 @@
                 `;
                 grid.appendChild(card);
             });
+
+            if (cardIndex >= filtered.length) {
+                cardIndex = Math.max(0, filtered.length - 1);
+            }
+            if (navZone === 'cards') {
+                updateKbFocus();
+            }
         }
 
-        function filterCategory(cat, el) {
-            currentCategory = cat;
-            document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-            if (el) el.classList.add('active');
-            renderVehCards();
+        function initCategoryPills() {
+            const pills = document.querySelectorAll('.cat-pill');
+            pills.forEach((p, idx) => {
+                p.onmouseenter = () => {
+                    navZone = 'categories';
+                    catIndex = idx;
+                    updateKbFocus();
+                };
+            });
+
+            const customInput = document.getElementById('customVehInput');
+            if (customInput) {
+                customInput.onfocus = () => {
+                    navZone = 'customInput';
+                    updateKbFocus();
+                };
+            }
+
+            const customBtn = document.querySelector('.code-submit-btn');
+            if (customBtn) {
+                customBtn.onmouseenter = () => {
+                    navZone = 'customBtn';
+                    updateKbFocus();
+                };
+            }
+        }
+
+        function handleKeyNav(key) {
+            const now = Date.now();
+            if (now - lastKeyNavTime < 80) return;
+            lastKeyNavTime = now;
+
+            const cards = document.querySelectorAll('.veh-card');
+            const pills = document.querySelectorAll('.cat-pill');
+            const totalCards = cards.length;
+            const totalCats = pills.length;
+            const cols = getGridCols();
+
+            if (key === 'ArrowUp') {
+                if (navZone === 'cards') {
+                    if (cardIndex < cols) {
+                        navZone = 'categories';
+                        catIndex = Math.min(catIndex, totalCats - 1);
+                    } else {
+                        cardIndex = Math.max(0, cardIndex - cols);
+                    }
+                } else if (navZone === 'customBtn') {
+                    navZone = 'customInput';
+                }
+                updateKbFocus();
+            } else if (key === 'ArrowDown') {
+                if (navZone === 'categories') {
+                    navZone = 'cards';
+                    cardIndex = 0;
+                } else if (navZone === 'cards') {
+                    if (cardIndex + cols < totalCards) {
+                        cardIndex += cols;
+                    }
+                } else if (navZone === 'customInput') {
+                    navZone = 'customBtn';
+                }
+                updateKbFocus();
+            } else if (key === 'ArrowLeft') {
+                // RTL: left moves to higher index in row, or to customInput at left edge
+                if (navZone === 'categories') {
+                    if (catIndex < totalCats - 1) {
+                        catIndex++;
+                        filterCategory(catKeys[catIndex], pills[catIndex], true);
+                    } else {
+                        navZone = 'customInput';
+                        updateKbFocus();
+                    }
+                } else if (navZone === 'cards') {
+                    if ((cardIndex + 1) % cols !== 0 && cardIndex + 1 < totalCards) {
+                        cardIndex++;
+                        updateKbFocus();
+                    } else {
+                        navZone = 'customInput';
+                        updateKbFocus();
+                    }
+                }
+            } else if (key === 'ArrowRight') {
+                // RTL: right moves to lower index in row, or from customInput back to cards
+                if (navZone === 'customInput') {
+                    const input = document.getElementById('customVehInput');
+                    if (!input || input.value.length === 0 || input.selectionStart === input.value.length) {
+                        navZone = 'cards';
+                        cardIndex = 0;
+                        updateKbFocus();
+                    }
+                } else if (navZone === 'customBtn') {
+                    navZone = 'cards';
+                    cardIndex = 0;
+                    updateKbFocus();
+                } else if (navZone === 'categories') {
+                    if (catIndex > 0) {
+                        catIndex--;
+                        filterCategory(catKeys[catIndex], pills[catIndex], true);
+                    }
+                } else if (navZone === 'cards') {
+                    if (cardIndex % cols !== 0 && cardIndex > 0) {
+                        cardIndex--;
+                        updateKbFocus();
+                    }
+                }
+            } else if (key === 'Enter') {
+                if (navZone === 'cards' && cards[cardIndex]) {
+                    cards[cardIndex].click();
+                } else if (navZone === 'customInput' || navZone === 'customBtn') {
+                    triggerSpawnInput();
+                } else if (navZone === 'categories' && pills[catIndex]) {
+                    filterCategory(catKeys[catIndex], pills[catIndex], true);
+                }
+            } else if (key === 'Escape') {
+                closeVehMenu();
+            }
         }
 
         function spawnVehicle(modelCode) {
@@ -489,8 +695,12 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeVehMenu();
+            const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape'];
+            if (navKeys.includes(e.key)) {
+                if (e.key !== 'Escape' && (navZone !== 'customInput' || e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Enter')) {
+                    e.preventDefault();
+                }
+                handleKeyNav(e.key);
             }
         });
 
@@ -505,12 +715,19 @@
                     if (wrapper) wrapper.style.display = 'none';
                 } else {
                     if (wrapper) wrapper.style.display = 'flex';
+                    navZone = 'cards';
+                    cardIndex = 0;
+                    updateKbFocus();
                 }
+            } else if (msgType === 'keyNavigation' && data.key) {
+                handleKeyNav(data.key);
             }
         });
 
         // Initialize
+        initCategoryPills();
         renderVehCards();
+        updateKbFocus();
     </script>
 </body>
 
