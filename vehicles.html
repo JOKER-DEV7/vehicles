@@ -17,7 +17,7 @@
         }
 
         body {
-            background: transparent;
+            background: transparent !important;
             font-family: 'Cairo', 'Inter', sans-serif;
             color: #ffffff;
             width: 100vw;
@@ -41,12 +41,6 @@
             overflow: hidden;
             position: relative;
             backdrop-filter: blur(15px);
-            opacity: 0;
-            transform: scale(0.95);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        #veh-menu-wrapper.visible {
             opacity: 1;
             transform: scale(1);
         }
