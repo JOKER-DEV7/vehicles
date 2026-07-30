@@ -634,14 +634,7 @@
                 }
             } else if (key === 'ArrowRight') {
                 // RTL: right moves to lower index in row, or from customInput back to cards
-                if (navZone === 'customInput') {
-                    const input = document.getElementById('customVehInput');
-                    if (!input || input.value.length === 0 || input.selectionStart === input.value.length) {
-                        navZone = 'cards';
-                        cardIndex = 0;
-                        updateKbFocus();
-                    }
-                } else if (navZone === 'customBtn') {
+                if (navZone === 'customInput' || navZone === 'customBtn') {
                     navZone = 'cards';
                     cardIndex = 0;
                     updateKbFocus();
