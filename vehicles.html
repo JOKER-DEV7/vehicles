@@ -730,6 +730,19 @@
                 if (input) {
                     input.value += data.char;
                 }
+            } else if (msgType === 'syncState') {
+                if (data.navZone) navZone = data.navZone;
+                if (data.catIndex !== undefined && data.catIndex !== catIndex) {
+                    catIndex = data.catIndex;
+                    const pills = document.querySelectorAll('.cat-pill');
+                    filterCategory(catKeys[catIndex], pills[catIndex], false);
+                }
+                if (data.cardIndex !== undefined) cardIndex = data.cardIndex;
+                if (data.customCode !== undefined) {
+                    const input = document.getElementById('customVehInput');
+                    if (input) input.value = data.customCode;
+                }
+                updateKbFocus();
             }
         });
 
